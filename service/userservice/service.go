@@ -12,7 +12,7 @@ type Storage interface{
 
 }
 type Validator interface{
-	IsPhoneNumberUniq(phonenumber string)(bool,error)
+	IsPhoneNumberUniq(phoneNumber string)(bool,error)
 }
 
 type Service struct {
