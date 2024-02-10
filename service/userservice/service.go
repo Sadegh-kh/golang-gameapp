@@ -8,7 +8,7 @@ import (
 
 type Storage interface{
 	Validator
-	SaveUser(u entity.User)(entity.User,error)
+	Register(u entity.User)(entity.User,error)
 
 }
 type Validator interface{
@@ -50,7 +50,7 @@ func (s Service) Register(req RegisterRequest) (RegisterResponse,error) {
 	passHash:=hashpassword.EncodePasword(req.Password)
 
 	// save to storage
-	newUser,err:=s.storage.SaveUser(entity.User{
+	newUser,err:=s.storage.Register(entity.User{
 		ID: 0,
 		Name: req.Name,
 		PhoneNumber: req.PhoneNumber,
