@@ -19,12 +19,18 @@ func main() {
 	// fmt.Println("orginal password: ",pass)
 
 	myDb:=mysql.New()
-	newUser,err:=myDb.Register(entity.User{Name: "sadegh",PhoneNumber: "0421412",Password: "3232324"})
+	newUser,err:=myDb.Register(entity.User{Name: "sadegh",PhoneNumber: "0211412",Password: "3232324"})
 	if err!=nil{
 		fmt.Println("resgister err: ",err)
 		
 		return
 	}
-	fmt.Println("new user: ",newUser)
+	fmt.Println("new user:",newUser)
+
+	isUniq,err:= myDb.IsPhoneNumberUniq(newUser.PhoneNumber+"213")
+	if err!=nil{
+		fmt.Println(err)
+	}
+	fmt.Println("phone number is uniq:",isUniq)
 
 }

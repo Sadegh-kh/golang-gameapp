@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"database/sql"
 	"fmt"
 	"gameapp/entity"
 )
@@ -18,5 +19,16 @@ func (d *MySQLDB) Register(u entity.User) (entity.User, error) {
 }
 
 func (d *MySQLDB) IsPhoneNumberUniq(phoneNumber string) (bool, error) {
-	panic("not implmented")
+	user:=entity.User{}
+	var create_at []uint8
+	row:=d.DB.QueryRow("select * from users where phone_number = ?",phoneNumber)
+	err:=row.Scan(&user.ID,&user.Name,&user.PhoneNumber,&user.Password,&create_at)
+	if err!=nil{
+		if err == sql.ErrNoRows{
+			return true , nil
+		}
+
+		return false , fmt.Errorf("error when scan rows becuse: %w",err)
+	}
+	return false , nil
 }
