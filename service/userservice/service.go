@@ -6,13 +6,12 @@ import (
 	"gameapp/pkg/hashpassword"
 )
 
-type Storage interface{
+type Storage interface {
 	Validator
-	Register(u entity.User)(entity.User,error)
-
+	Register(u entity.User) (entity.User, error)
 }
-type Validator interface{
-	IsPhoneNumberUniq(phoneNumber string)(bool,error)
+type Validator interface {
+	IsPhoneNumberUniq(phoneNumber string) (bool, error)
 }
 
 type Service struct {
@@ -28,38 +27,44 @@ type RegisterResponse struct {
 	User entity.User
 }
 
-func (s Service) Register(req RegisterRequest) (RegisterResponse,error) {
+func New(storage Storage) Service {
+	return Service{storage: storage}
+}
+func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
 
 	// validator
 	// uniq phone number
 	// 11 len of phon number
 	// more than 6 len of password
-	if isUniq,err:=s.storage.IsPhoneNumberUniq(req.PhoneNumber);err!=nil || !isUniq{
-		if err!=nil{
-			return RegisterResponse{},err
+	if isUniq, err := s.storage.IsPhoneNumberUniq(req.PhoneNumber); err != nil || !isUniq {
+		if err != nil {
+			return RegisterResponse{}, err
 		}
-		if !isUniq	{
-			return RegisterResponse{},fmt.Errorf("phone number is not uniq")
+		if !isUniq {
+			return RegisterResponse{}, fmt.Errorf("phone number is not uniq")
 		}
 	}
-	if len(req.Password)<6{
-		return RegisterResponse{},fmt.Errorf("password should be more than 6 character")
+	if len(req.PhoneNumber) != 11 {
+		return RegisterResponse{}, fmt.Errorf("phone number must writed by 11 number")
+	}
+	if len(req.Password) < 6 {
+		return RegisterResponse{}, fmt.Errorf("password should be more than 6 character")
 	}
 
 	// hash passwrd
-	passHash:=hashpassword.EncodePasword(req.Password)
+	passHash := hashpassword.EncodePasword(req.Password)
 
 	// save to storage
-	newUser,err:=s.storage.Register(entity.User{
-		ID: 0,
-		Name: req.Name,
+	newUser, err := s.storage.Register(entity.User{
+		ID:          0,
+		Name:        req.Name,
 		PhoneNumber: req.PhoneNumber,
-		Password: passHash,
+		Password:    passHash,
 	})
-	if err!=nil{
-		return RegisterResponse{},err
+	if err != nil {
+		return RegisterResponse{}, err
 	}
 
 	// return new user
-	return RegisterResponse{User: newUser},nil
+	return RegisterResponse{User: newUser}, nil
 }

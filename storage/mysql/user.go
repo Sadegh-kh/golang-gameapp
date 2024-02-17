@@ -9,7 +9,7 @@ import (
 func (d *MySQLDB) Register(u entity.User) (entity.User, error) {
 	res, err := d.DB.Exec("insert into users(name,phone_number,password) value(?,?,?)", u.Name, u.PhoneNumber, u.Password)
 	if err != nil {
-		return entity.User{}, fmt.Errorf("can't excute on db in register bucuse: %w", err)
+		return entity.User{}, fmt.Errorf("%w", err)
 	}
 	// error always nil
 	id, _ := res.LastInsertId()
@@ -19,16 +19,16 @@ func (d *MySQLDB) Register(u entity.User) (entity.User, error) {
 }
 
 func (d *MySQLDB) IsPhoneNumberUniq(phoneNumber string) (bool, error) {
-	user:=entity.User{}
+	user := entity.User{}
 	var create_at []uint8
-	row:=d.DB.QueryRow("select * from users where phone_number = ?",phoneNumber)
-	err:=row.Scan(&user.ID,&user.Name,&user.PhoneNumber,&user.Password,&create_at)
-	if err!=nil{
-		if err == sql.ErrNoRows{
-			return true , nil
+	row := d.DB.QueryRow("select * from users where phone_number = ?", phoneNumber)
+	err := row.Scan(&user.ID, &user.Name, &user.PhoneNumber, &user.Password, &create_at)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return true, nil
 		}
 
-		return false , fmt.Errorf("error when scan rows becuse: %w",err)
+		return false, fmt.Errorf("%w", err)
 	}
-	return false , nil
+	return false, nil
 }
