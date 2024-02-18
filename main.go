@@ -29,9 +29,43 @@ func main() {
 	// method 2
 	http.HandleFunc("/", healthCheckerHandler)
 	http.HandleFunc("/user/register", userRegisterHandler)
+	http.HandleFunc("/user/login", userLoginHandler)
 	log.Println("server in localhost:8080 is listening...")
 	http.ListenAndServe(":8080", nil)
 
+}
+
+func userLoginHandler(rep http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		fmt.Fprintf(rep, `{"error":"invalid method"}`)
+
+		return
+	}
+
+	log.Println(`{"log":"request login user post resived"}`)
+
+	data, err := io.ReadAll(req.Body)
+	if err != nil {
+		rep.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
+
+		return
+	}
+
+	var logReq userservice.LoginRequest
+	err = json.Unmarshal(data, &logReq)
+	if err != nil {
+		rep.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
+
+		return
+	}
+
+	_, err = userService.Login(logReq)
+	if err != nil {
+		rep.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
+
+		return
+	}
+	rep.Write([]byte(`{"login":"user login successfully"}`))
 }
 
 func userRegisterHandler(rep http.ResponseWriter, req *http.Request) {
