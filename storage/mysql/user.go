@@ -32,3 +32,22 @@ func (d *MySQLDB) IsPhoneNumberUniq(phoneNumber string) (bool, error) {
 	}
 	return false, nil
 }
+
+func (d *MySQLDB) CheckUserExistAndGet(phoneNumber string) (entity.User, bool, error) {
+	user := entity.User{}
+	var create_at []uint8
+
+	row := d.DB.QueryRow("SELECT * FROM users where phone_number = ?", phoneNumber)
+
+	err := row.Scan(&user.ID, &user.Name, &user.PhoneNumber, &user.Password, &create_at)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return entity.User{}, false, nil
+		}
+
+		return entity.User{}, true, err
+	}
+
+	return user, true, nil
+}
