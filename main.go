@@ -30,8 +30,44 @@ func main() {
 	http.HandleFunc("/", healthCheckerHandler)
 	http.HandleFunc("/user/register", userRegisterHandler)
 	http.HandleFunc("/user/login", userLoginHandler)
+	http.HandleFunc("/user/profile", profileHandler)
 	log.Println("server in localhost:8080 is listening...")
 	http.ListenAndServe(":8080", nil)
+
+}
+
+func profileHandler(rep http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		// fprint called rep's write method
+		fmt.Fprintln(rep, `{"error":"invalid method"}`)
+
+		return
+	}
+
+	log.Println(`{"log":"request profile Get resived"}`)
+
+	data, err := io.ReadAll(req.Body)
+	if err != nil {
+		fmt.Fprintf(rep, `{"error":"%v"}`, err)
+
+		return
+	}
+	var proReq userservice.ProfileRequest
+
+	err = json.Unmarshal(data, &proReq)
+	if err != nil {
+		fmt.Fprintf(rep, `{"error":"%v"}`, err)
+
+		return
+	}
+	proRep, err := userService.Profile(proReq)
+	if err != nil {
+		fmt.Fprintf(rep, `{"error":"%v"}`, err)
+
+		return
+	}
+
+	fmt.Fprintf(rep, `{"user_name":%s}`, proRep.Name)
 
 }
 

@@ -4,13 +4,17 @@ import (
 	"fmt"
 	"gameapp/entity"
 	"gameapp/pkg/hashpassword"
+
+	_ "github.com/golang-jwt/jwt/v5"
 )
 
 type Storage interface {
 	Validator
 	Register(u entity.User) (entity.User, error)
 	CheckUserExistAndGet(phoneNumber string) (entity.User, bool, error)
+	GetUserByID(uid uint) (entity.User, error)
 }
+
 type Validator interface {
 	IsPhoneNumberUniq(phoneNumber string) (bool, error)
 }
@@ -100,6 +104,31 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 		return LoginResponse{}, fmt.Errorf("phone number or password is incorrect")
 	}
 
+	// method 1
+	// we can gnarate session and send session ID to user
+	// with that sassion ID we can authentication and authroization user
+
+	// method 2
+	// jwt token
+
 	return LoginResponse{User: user}, nil
+
+}
+
+type ProfileRequest struct {
+	UserID uint `json:"user_id"`
+}
+type ProfileResponce struct {
+	Name string
+}
+
+func (s Service) Profile(req ProfileRequest) (ProfileResponce, error) {
+	user, err := s.storage.GetUserByID(req.UserID)
+	if err != nil {
+		// TODO - we can use rich error for all error example : not found , unexpected error
+		return ProfileResponce{}, err
+	}
+
+	return ProfileResponce{Name: user.Name}, nil
 
 }

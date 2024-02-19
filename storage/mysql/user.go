@@ -19,10 +19,9 @@ func (d *MySQLDB) Register(u entity.User) (entity.User, error) {
 }
 
 func (d *MySQLDB) IsPhoneNumberUniq(phoneNumber string) (bool, error) {
-	user := entity.User{}
-	var create_at []uint8
+
 	row := d.DB.QueryRow("select * from users where phone_number = ?", phoneNumber)
-	err := row.Scan(&user.ID, &user.Name, &user.PhoneNumber, &user.Password, &create_at)
+	_, err := userScan(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return true, nil
@@ -34,12 +33,9 @@ func (d *MySQLDB) IsPhoneNumberUniq(phoneNumber string) (bool, error) {
 }
 
 func (d *MySQLDB) CheckUserExistAndGet(phoneNumber string) (entity.User, bool, error) {
-	user := entity.User{}
-	var create_at []uint8
-
 	row := d.DB.QueryRow("SELECT * FROM users where phone_number = ?", phoneNumber)
 
-	err := row.Scan(&user.ID, &user.Name, &user.PhoneNumber, &user.Password, &create_at)
+	user, err := userScan(row)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -50,4 +46,27 @@ func (d *MySQLDB) CheckUserExistAndGet(phoneNumber string) (entity.User, bool, e
 	}
 
 	return user, true, nil
+}
+
+func (d *MySQLDB) GetUserByID(uid uint) (entity.User, error) {
+	row := d.DB.QueryRow("select * from users where id=?", uid)
+	user, err := userScan(row)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return entity.User{}, fmt.Errorf("user not found")
+		}
+
+		return entity.User{}, err
+	}
+
+	return user, nil
+}
+
+func userScan(row *sql.Row) (entity.User, error) {
+	var user entity.User
+	var create_at []uint8
+
+	err := row.Scan(&user.ID, &user.Name, &user.PhoneNumber, &user.Password, &create_at)
+
+	return user, err
 }
