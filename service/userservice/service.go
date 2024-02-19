@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"gameapp/entity"
 	"gameapp/pkg/hashpassword"
+	"time"
 
-	_ "github.com/golang-jwt/jwt/v5"
+	jwt "github.com/golang-jwt/jwt/v4"
 )
 
 type Storage interface {
@@ -21,6 +22,7 @@ type Validator interface {
 
 type Service struct {
 	storage Storage
+	SignKey string
 }
 type RegisterRequest struct {
 	Name        string `json:"name"`
@@ -32,8 +34,8 @@ type RegisterResponse struct {
 	User entity.User `json:"user"`
 }
 
-func New(storage Storage) Service {
-	return Service{storage: storage}
+func New(storage Storage, singKey string) Service {
+	return Service{storage: storage, SignKey: singKey}
 }
 func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
 
@@ -83,7 +85,7 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	User entity.User `json:"user"`
+	Token string `json:"access_token"`
 }
 
 func (s Service) Login(req LoginRequest) (LoginResponse, error) {
@@ -110,8 +112,12 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 
 	// method 2
 	// jwt token
+	token, err := createToken(user.ID, s.SignKey)
+	if err != nil {
+		return LoginResponse{}, err
+	}
 
-	return LoginResponse{User: user}, nil
+	return LoginResponse{Token: token}, nil
 
 }
 
@@ -131,4 +137,36 @@ func (s Service) Profile(req ProfileRequest) (ProfileResponce, error) {
 
 	return ProfileResponce{Name: user.Name}, nil
 
+}
+
+type Claims struct {
+	RegisteredClaim jwt.RegisteredClaims
+	UserID          uint
+}
+
+// Valid implements jwt.Claims.
+func (*Claims) Valid() error {
+	return nil
+}
+
+func createToken(uid uint, signKey string) (string, error) {
+	// TODO - create jwt by RS256 algorithm
+	t := jwt.New(jwt.GetSigningMethod("HS256"))
+
+	// set our claims
+	t.Claims = &Claims{
+		RegisteredClaim: jwt.RegisteredClaims{
+			// set the expire time
+			// see https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 7)),
+		},
+		UserID: uid,
+	}
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, t.Claims)
+	tokenString, err := accessToken.SignedString([]byte(signKey))
+	if err != nil {
+		return "", err
+	}
+	// Creat token string
+	return tokenString, nil
 }

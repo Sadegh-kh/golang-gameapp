@@ -12,9 +12,13 @@ import (
 	"net/http"
 )
 
+const (
+	SecretKey = "secret"
+)
+
 var (
 	mySQL       = mysql.New()
-	userService = userservice.New(&mySQL)
+	userService = userservice.New(&mySQL, SecretKey)
 )
 
 func main() {
@@ -95,13 +99,20 @@ func userLoginHandler(rep http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	_, err = userService.Login(logReq)
+	token, err := userService.Login(logReq)
 	if err != nil {
 		rep.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
 
 		return
 	}
-	rep.Write([]byte(`{"login":"user login successfully"}`))
+
+	repLog, err := json.Marshal(token)
+	if err != nil {
+		rep.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
+
+		return
+	}
+	rep.Write(repLog)
 }
 
 func userRegisterHandler(rep http.ResponseWriter, req *http.Request) {
