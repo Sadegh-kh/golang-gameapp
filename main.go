@@ -5,20 +5,26 @@ import (
 	"fmt"
 	"gameapp/entity"
 	"gameapp/pkg/hashpassword"
+	"gameapp/service/authservice"
 	"gameapp/service/userservice"
 	"gameapp/storage/mysql"
 	"io"
 	"log"
 	"net/http"
+	"strings"
+	"time"
 )
 
 const (
-	SecretKey = "secret"
+	SecretKey            = "secret"
+	AccessTokenDuration  = time.Hour * 24
+	RefreshTokenDuration = time.Hour * 24 * 7
 )
 
 var (
+	authService = authservice.New(SecretKey, "ac", "rf", AccessTokenDuration, RefreshTokenDuration)
 	mySQL       = mysql.New()
-	userService = userservice.New(&mySQL, SecretKey)
+	userService = userservice.New(&mySQL, authService)
 )
 
 func main() {
@@ -50,20 +56,17 @@ func profileHandler(rep http.ResponseWriter, req *http.Request) {
 
 	log.Println(`{"log":"request profile Get resived"}`)
 
-	data, err := io.ReadAll(req.Body)
+	authToken := req.Header.Get("Authorization")
+	authToken = strings.Replace(authToken, "Bearer ", "", 1)
+
+	uid, err := authService.ParseToken(authToken)
 	if err != nil {
 		fmt.Fprintf(rep, `{"error":"%v"}`, err)
 
 		return
 	}
-	var proReq userservice.ProfileRequest
+	proReq := userservice.ProfileRequest{UserID: uid}
 
-	err = json.Unmarshal(data, &proReq)
-	if err != nil {
-		fmt.Fprintf(rep, `{"error":"%v"}`, err)
-
-		return
-	}
 	proRep, err := userService.Profile(proReq)
 	if err != nil {
 		fmt.Fprintf(rep, `{"error":"%v"}`, err)

@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"gameapp/entity"
 	"gameapp/pkg/hashpassword"
-	"time"
-
-	jwt "github.com/golang-jwt/jwt/v4"
 )
 
 type Storage interface {
@@ -20,9 +17,14 @@ type Validator interface {
 	IsPhoneNumberUniq(phoneNumber string) (bool, error)
 }
 
+type authService interface {
+	CreateAccessToken(uid uint) (string, error)
+	CreateRefreshToken(uid uint) (string, error)
+}
+
 type Service struct {
 	storage Storage
-	SignKey string
+	auth    authService
 }
 type RegisterRequest struct {
 	Name        string `json:"name"`
@@ -34,8 +36,8 @@ type RegisterResponse struct {
 	User entity.User `json:"user"`
 }
 
-func New(storage Storage, singKey string) Service {
-	return Service{storage: storage, SignKey: singKey}
+func New(storage Storage, authService authService) Service {
+	return Service{storage: storage, auth: authService}
 }
 func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
 
@@ -61,7 +63,7 @@ func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
 
 	// TODO - check regex pattern password
 
-	// hash passwrd
+	// hash password
 	passHash := hashpassword.EncodePasword(req.Password)
 
 	// save to storage
@@ -85,7 +87,8 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Token string `json:"access_token"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 func (s Service) Login(req LoginRequest) (LoginResponse, error) {
@@ -107,66 +110,39 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 	}
 
 	// method 1
-	// we can gnarate session and send session ID to user
-	// with that sassion ID we can authentication and authroization user
+	// we can generate session and send session ID to user
+	// with that session ID we can authentication and authorization user
 
 	// method 2
 	// jwt token
-	token, err := createToken(user.ID, s.SignKey)
+	accessToken, err := s.auth.CreateAccessToken(user.ID)
 	if err != nil {
 		return LoginResponse{}, err
 	}
 
-	return LoginResponse{Token: token}, nil
+	refreshToken, err := s.auth.CreateRefreshToken(user.ID)
+	if err != nil {
+		return LoginResponse{}, err
+	}
+
+	return LoginResponse{AccessToken: accessToken, RefreshToken: refreshToken}, nil
 
 }
 
 type ProfileRequest struct {
 	UserID uint `json:"user_id"`
 }
-type ProfileResponce struct {
+type ProfileResponse struct {
 	Name string
 }
 
-func (s Service) Profile(req ProfileRequest) (ProfileResponce, error) {
+func (s Service) Profile(req ProfileRequest) (ProfileResponse, error) {
 	user, err := s.storage.GetUserByID(req.UserID)
 	if err != nil {
 		// TODO - we can use rich error for all error example : not found , unexpected error
-		return ProfileResponce{}, err
+		return ProfileResponse{}, err
 	}
 
-	return ProfileResponce{Name: user.Name}, nil
+	return ProfileResponse{Name: user.Name}, nil
 
-}
-
-type Claims struct {
-	RegisteredClaim jwt.RegisteredClaims
-	UserID          uint
-}
-
-// Valid implements jwt.Claims.
-func (*Claims) Valid() error {
-	return nil
-}
-
-func createToken(uid uint, signKey string) (string, error) {
-	// TODO - create jwt by RS256 algorithm
-	t := jwt.New(jwt.GetSigningMethod("HS256"))
-
-	// set our claims
-	t.Claims = &Claims{
-		RegisteredClaim: jwt.RegisteredClaims{
-			// set the expire time
-			// see https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 7)),
-		},
-		UserID: uid,
-	}
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, t.Claims)
-	tokenString, err := accessToken.SignedString([]byte(signKey))
-	if err != nil {
-		return "", err
-	}
-	// Creat token string
-	return tokenString, nil
 }
