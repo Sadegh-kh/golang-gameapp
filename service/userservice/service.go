@@ -33,7 +33,9 @@ type RegisterRequest struct {
 }
 
 type RegisterResponse struct {
-	User entity.User `json:"user"`
+	ID          uint   `json:"id"`
+	Name        string `json:"name"`
+	PhoneNumber string `json:"phone_number"`
 }
 
 func New(storage Storage, authService authService) Service {
@@ -43,7 +45,7 @@ func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
 
 	// validator
 	// uniq phone number
-	// 11 len of phon number
+	// 11 len of phone number
 	// more than 6 len of password
 	if isUniq, err := s.storage.IsPhoneNumberUniq(req.PhoneNumber); err != nil || !isUniq {
 		if err != nil {
@@ -78,7 +80,7 @@ func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
 	}
 
 	// return new user
-	return RegisterResponse{User: newUser}, nil
+	return RegisterResponse{ID: newUser.ID, Name: newUser.Name, PhoneNumber: newUser.PhoneNumber}, nil
 }
 
 type LoginRequest struct {

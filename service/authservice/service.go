@@ -5,36 +5,36 @@ import (
 	"time"
 )
 
-type Service struct {
-	secretKey            string
-	accessTokenDuration  time.Duration
-	refreshTokenDuration time.Duration
-	accessSubject        string
-	refreshSubject       string
+type Config struct {
+	SecretKey            string
+	AccessTokenDuration  time.Duration
+	RefreshTokenDuration time.Duration
+	AccessSubject        string
+	RefreshSubject       string
 }
 
-func New(secretKey, accessSubject, refreshSubject string, accessDuration, refreshDuration time.Duration) Service {
+type Service struct {
+	config Config
+}
+
+func New(cfg Config) Service {
 	return Service{
-		secretKey:            secretKey,
-		accessTokenDuration:  accessDuration,
-		refreshTokenDuration: refreshDuration,
-		accessSubject:        accessSubject,
-		refreshSubject:       refreshSubject,
+		config: cfg,
 	}
 
 }
 
 func (s Service) CreateAccessToken(uid uint) (string, error) {
-	return createToken(uid, s.accessSubject, s.secretKey, s.accessTokenDuration)
+	return createToken(uid, s.config.AccessSubject, s.config.SecretKey, s.config.AccessTokenDuration)
 }
 func (s Service) CreateRefreshToken(uid uint) (string, error) {
-	return createToken(uid, s.refreshSubject, s.secretKey, s.refreshTokenDuration)
+	return createToken(uid, s.config.RefreshSubject, s.config.SecretKey, s.config.RefreshTokenDuration)
 }
 
 func (s Service) ParseToken(token string) (uint, error) {
 	var userClaim Claims
 	_, err := jwt.ParseWithClaims(token, &userClaim, func(token *jwt.Token) (interface{}, error) {
-		return []byte(s.secretKey), nil
+		return []byte(s.config.SecretKey), nil
 	})
 	if err != nil {
 		return 0, err
