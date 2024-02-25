@@ -51,6 +51,9 @@ func main() {
 			Port:         3310,
 			DataBaseName: "gameapp_db",
 		}}
+	//migrator
+	//mig := migrator.New(cfg.MySQL)
+	//mig.Up()
 
 	authService, userService := setupService(cfg)
 
