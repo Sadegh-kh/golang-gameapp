@@ -11,15 +11,11 @@ func (s Server) userRegister(c echo.Context) error {
 	var regReq userservice.RegisterRequest
 	err := c.Bind(&regReq)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{
-			"error": err.Error(),
-		})
+		return raiseError(err)
 	}
 	newUser, err := s.userService.Register(regReq)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{
-			"error": err.Error(),
-		})
+		return raiseError(err)
 	}
 	return c.JSON(http.StatusCreated, newUser)
 }
@@ -29,15 +25,11 @@ func (s Server) userLogin(c echo.Context) error {
 	var req userservice.LoginRequest
 	err := c.Bind(&req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{
-			"error": err.Error(),
-		})
+		return raiseError(err)
 	}
 	token, err := s.userService.Login(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{
-			"error": err.Error(),
-		})
+		return raiseError(err)
 	}
 
 	return c.JSON(http.StatusOK, token)
@@ -49,17 +41,13 @@ func (s Server) userProfile(c echo.Context) error {
 
 	uid, err := s.authService.ParseToken(authToken)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{
-			"error": err.Error(),
-		})
+		return raiseError(err)
 	}
 	req := userservice.ProfileRequest{UserID: uid}
 
 	rep, err := s.userService.Profile(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{
-			"error": err.Error(),
-		})
+		return raiseError(err)
 	}
 
 	return c.JSON(http.StatusOK, rep)

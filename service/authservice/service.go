@@ -1,6 +1,7 @@
 package authservice
 
 import (
+	"gameapp/pkg/richerror"
 	"github.com/golang-jwt/jwt/v4"
 	"time"
 )
@@ -37,7 +38,15 @@ func (s Service) ParseToken(token string) (uint, error) {
 		return []byte(s.config.SecretKey), nil
 	})
 	if err != nil {
-		return 0, err
+		return 0, richerror.RichError{
+			Operation:    "authservice.ParseToken",
+			WrappedError: err,
+			Message:      "invalid token",
+			Kind:         richerror.Invalid,
+			Meta: map[string]interface{}{
+				"message": err.Error(),
+			},
+		}
 	}
 	return userClaim.UserID, nil
 }

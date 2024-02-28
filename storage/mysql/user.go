@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"gameapp/entity"
+	"gameapp/pkg/richerror"
 )
 
 func (d *MySQLDB) Register(u entity.User) (entity.User, error) {
@@ -26,7 +27,6 @@ func (d *MySQLDB) IsPhoneNumberUniq(phoneNumber string) (bool, error) {
 		if err == sql.ErrNoRows {
 			return true, nil
 		}
-
 		return false, fmt.Errorf("%w", err)
 	}
 	return false, nil
@@ -53,10 +53,24 @@ func (d *MySQLDB) GetUserByID(uid uint) (entity.User, error) {
 	user, err := userScan(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return entity.User{}, fmt.Errorf("user not found")
+			return entity.User{}, richerror.RichError{
+				Operation:    "mysql.GetUserByID",
+				WrappedError: nil,
+				Message:      "user not found",
+				Kind:         richerror.NotFound,
+				Meta:         nil,
+			}
 		}
 
-		return entity.User{}, err
+		return entity.User{}, richerror.RichError{
+			Operation:    "mysql.GetUserByID",
+			WrappedError: err,
+			Message:      "unexpected error",
+			Kind:         richerror.Unexpected,
+			Meta: map[string]interface{}{
+				"message": err.Error(),
+			},
+		}
 	}
 
 	return user, nil
@@ -65,7 +79,6 @@ func (d *MySQLDB) GetUserByID(uid uint) (entity.User, error) {
 func userScan(row *sql.Row) (entity.User, error) {
 	var user entity.User
 	var create_at []uint8
-
 	err := row.Scan(&user.ID, &user.Name, &user.PhoneNumber, &create_at, &user.Password)
 
 	return user, err

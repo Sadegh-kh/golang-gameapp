@@ -38,5 +38,5 @@ func (s Server) Serve() {
 	e.GET("/profile", s.userProfile)
 
 	// Start server
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", s.config.HttpConf.Port)))
+	e.Logger.Fatal(e.Start(fmt.Sprintf("127.0.0.1:%d", s.config.HttpConf.Port)))
 }
