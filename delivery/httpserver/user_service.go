@@ -1,6 +1,9 @@
 package httpserver
 
 import (
+	"errors"
+	"gameapp/dto"
+	"gameapp/pkg/richerror"
 	"gameapp/service/userservice"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -8,11 +11,20 @@ import (
 )
 
 func (s Server) userRegister(c echo.Context) error {
-	var regReq userservice.RegisterRequest
+	var regReq dto.RegisterRequest
 	err := c.Bind(&regReq)
 	if err != nil {
 		return raiseError(err)
 	}
+
+	//validation layer
+	err = s.userValidator.Register(regReq)
+	if err != nil {
+		var rErrs richerror.RichError
+		errors.As(err, &rErrs)
+		return echo.NewHTTPError(http.StatusBadRequest, rErrs.ValidationErrors)
+	}
+
 	newUser, err := s.userService.Register(regReq)
 	if err != nil {
 		return raiseError(err)

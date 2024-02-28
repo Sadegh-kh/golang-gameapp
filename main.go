@@ -6,6 +6,7 @@ import (
 	"gameapp/service/authservice"
 	"gameapp/service/userservice"
 	"gameapp/storage/mysql"
+	"gameapp/validator/uservalidator"
 	"time"
 )
 
@@ -14,6 +15,12 @@ const (
 	AccessTokenDuration  = time.Hour * 24
 	RefreshTokenDuration = time.Hour * 24 * 7
 )
+
+type Services struct {
+	User          userservice.Service
+	Auth          authservice.Service
+	UserValidator uservalidator.Validator
+}
 
 func main() {
 	// method 1
@@ -55,19 +62,24 @@ func main() {
 	//mig := migrator.New(cfg.MySQL)
 	//mig.Up()
 
-	authService, userService := setupService(cfg)
+	services := setupService(cfg)
 
-	server := httpserver.New(cfg, authService, userService)
+	server := httpserver.New(cfg, services.Auth, services.User, services.UserValidator)
 	server.Serve()
 
 }
 
-func setupService(cfg config.Config) (authservice.Service, userservice.Service) {
-	authService := authservice.New(cfg.Auth)
+func setupService(cfg config.Config) Services {
+	authS := authservice.New(cfg.Auth)
 	mySQL := mysql.New(cfg.MySQL)
-	userService := userservice.New(&mySQL, authService)
+	uValidator := uservalidator.New(&mySQL)
+	userS := userservice.New(&mySQL, authS)
 
-	return authService, userService
+	return Services{
+		User:          userS,
+		Auth:          authS,
+		UserValidator: uValidator,
+	}
 }
 
 //func profileHandler(rep http.ResponseWriter, req *http.Request) {

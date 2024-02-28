@@ -10,11 +10,12 @@ const (
 type KindError int
 
 type RichError struct {
-	Operation    string
-	WrappedError error
-	Message      string
-	Kind         KindError
-	Meta         map[string]interface{}
+	Operation        string
+	WrappedError     error
+	Message          string
+	Kind             KindError
+	Meta             map[string]interface{}
+	ValidationErrors map[string]string
 }
 
 func (r RichError) Error() string {

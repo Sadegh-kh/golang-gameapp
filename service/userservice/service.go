@@ -8,14 +8,9 @@ import (
 )
 
 type Storage interface {
-	Validator
 	Register(u entity.User) (entity.User, error)
 	CheckUserExistAndGet(phoneNumber string) (entity.User, bool, error)
 	GetUserByID(uid uint) (entity.User, error)
-}
-
-type Validator interface {
-	IsPhoneNumberUniq(phoneNumber string) (bool, error)
 }
 
 type authService interface {
@@ -28,65 +23,13 @@ type Service struct {
 	auth    authService
 }
 
-func New(storage Storage, authService authService) Service {
-	return Service{storage: storage, auth: authService}
+func New(stg Storage, authS authService) Service {
+	return Service{storage: stg, auth: authS}
 }
 func (s Service) Register(req dto.RegisterRequest) (dto.RegisterResponse, error) {
 
-	// validator
-	// uniq phone number
-	// 11 len of phone number
-	// more than 6 len of password
-	if isUniq, err := s.storage.IsPhoneNumberUniq(req.PhoneNumber); err != nil || !isUniq {
-		if err != nil {
-			return dto.RegisterResponse{}, richerror.RichError{
-				Operation:    "userservice.Register",
-				WrappedError: err,
-				Message:      "unexpected error",
-				Kind:         richerror.Unexpected,
-				Meta: map[string]interface{}{
-					"message": err.Error(),
-				},
-			}
-		}
-		if !isUniq {
-			return dto.RegisterResponse{}, richerror.RichError{
-				Operation:    "userservice.Register",
-				WrappedError: nil,
-				Message:      "phone number is not uniq",
-				Kind:         richerror.Invalid,
-				Meta:         nil,
-			}
-		}
-	}
-
-	if len(req.PhoneNumber) != 11 {
-		return dto.RegisterResponse{}, richerror.RichError{
-			Operation:    "userservice.Register",
-			WrappedError: nil,
-			Message:      "phone number must written by 11 number",
-			Kind:         richerror.Invalid,
-			Meta:         nil,
-		}
-	}
-
-	if len(req.Password) < 6 {
-		return dto.RegisterResponse{}, richerror.RichError{
-			Operation:    "userservice.Register",
-			WrappedError: nil,
-			Message:      "password should be more than 6 character",
-			Kind:         richerror.Invalid,
-			Meta:         nil,
-		}
-
-	}
-
-	// TODO - check regex pattern password
-
-	// hash password
 	passHash := hashpassword.EncodePasword(req.Password)
 
-	// save to storage
 	newUser, err := s.storage.Register(entity.User{
 		ID:          0,
 		Name:        req.Name,
@@ -105,7 +48,6 @@ func (s Service) Register(req dto.RegisterRequest) (dto.RegisterResponse, error)
 		}
 	}
 
-	// return new user
 	return dto.RegisterResponse{ID: newUser.ID, Name: newUser.Name, PhoneNumber: newUser.PhoneNumber}, nil
 }
 
@@ -121,7 +63,7 @@ type LoginResponse struct {
 
 func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 	// TODO - is better use 2 method for check user exist and get user for SOLID (S single responsibility)
-	// phone is exist and get user
+
 	user, exist, err := s.storage.CheckUserExistAndGet(req.PhoneNumber)
 	if err != nil {
 		return LoginResponse{}, richerror.RichError{
