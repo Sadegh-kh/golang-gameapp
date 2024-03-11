@@ -34,10 +34,16 @@ func (s Server) userRegister(c echo.Context) error {
 
 func (s Server) userLogin(c echo.Context) error {
 
-	var req userservice.LoginRequest
+	var req dto.LoginRequest
 	err := c.Bind(&req)
 	if err != nil {
 		return raiseError(err)
+	}
+	err = s.userValidator.Login(req)
+	if err != nil {
+		var rErr richerror.RichError
+		errors.As(err, &rErr)
+		return echo.NewHTTPError(http.StatusBadRequest, rErr.ValidationErrors)
 	}
 	token, err := s.userService.Login(req)
 	if err != nil {

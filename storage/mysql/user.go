@@ -32,20 +32,34 @@ func (d *MySQLDB) IsPhoneNumberUniq(phoneNumber string) (bool, error) {
 	return false, nil
 }
 
-func (d *MySQLDB) CheckUserExistAndGet(phoneNumber string) (entity.User, bool, error) {
+func (d *MySQLDB) GetUserByPhoneNumber(phoneNumber string) (entity.User, error) {
 	row := d.DB.QueryRow("SELECT * FROM users where phone_number = ?", phoneNumber)
 
 	user, err := userScan(row)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return entity.User{}, false, nil
+			return entity.User{}, richerror.RichError{
+				Operation:    "mysql.GetUserByPhoneNumber",
+				WrappedError: nil,
+				Message:      "user not exist",
+				Kind:         richerror.NotFound,
+				Meta:         nil,
+			}
 		}
 
-		return entity.User{}, true, err
+		return entity.User{}, richerror.RichError{
+			Operation:    "mysql.GetUserByPhoneNumber",
+			WrappedError: err,
+			Message:      "unexpected error",
+			Kind:         richerror.Unexpected,
+			Meta: map[string]interface{}{
+				"message": err.Error(),
+			},
+		}
 	}
 
-	return user, true, nil
+	return user, nil
 }
 
 func (d *MySQLDB) GetUserByID(uid uint) (entity.User, error) {
