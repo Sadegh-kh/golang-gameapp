@@ -24,20 +24,20 @@ type Services struct {
 
 func main() {
 	// method 1
-	// mux := http.NewServeMux()
+	// mux := httpconverter.NewServeMux()
 	// mux.HandleFunc("/", healthCheckerHandler)
 	// mux.HandleFunc("/user/register/", userRegisterHandler)
-	// server := http.Server{Addr: ":8080", Handler: mux}
+	// server := httpconverter.Server{Addr: ":8080", Handler: mux}
 	// log.Println("server in localhost:8080 is listening...")
 	// server.ListenAndServe()
 
 	// method 2
-	//http.HandleFunc("/", healthCheckerHandler)
-	//http.HandleFunc("/user/register", userRegisterHandler)
-	//http.HandleFunc("/user/login", userLoginHandler)
-	//http.HandleFunc("/user/profile", profileHandler)
+	//httpconverter.HandleFunc("/", healthCheckerHandler)
+	//httpconverter.HandleFunc("/user/register", userRegisterHandler)
+	//httpconverter.HandleFunc("/user/login", userLoginHandler)
+	//httpconverter.HandleFunc("/user/profile", profileHandler)
 	//log.Println("server in localhost:8080 is listening...")
-	//http.ListenAndServe(":8080", nil)
+	//httpconverter.ListenAndServe(":8080", nil)
 
 	// method 3 (echo framework)
 	cfg := config.Config{
@@ -82,8 +82,8 @@ func setupService(cfg config.Config) Services {
 	}
 }
 
-//func profileHandler(rep http.ResponseWriter, req *http.Request) {
-//	if req.Method != http.MethodGet {
+//func profileHandler(rep httpconverter.ResponseWriter, req *httpconverter.Request) {
+//	if req.Method != httpconverter.MethodGet {
 //		// fprint called rep's write method
 //		fmt.Fprintln(rep, `{"error":"invalid method"}`)
 //
@@ -114,8 +114,8 @@ func setupService(cfg config.Config) Services {
 //
 //}
 
-//func userLoginHandler(rep http.ResponseWriter, req *http.Request) {
-//	if req.Method != http.MethodPost {
+//func userLoginHandler(rep httpconverter.ResponseWriter, req *httpconverter.Request) {
+//	if req.Method != httpconverter.MethodPost {
 //		fmt.Fprintf(rep, `{"error":"invalid method"}`)
 //
 //		return
@@ -154,8 +154,8 @@ func setupService(cfg config.Config) Services {
 //	rep.Write(repLog)
 //}
 
-//func userRegisterHandler(rep http.ResponseWriter, req *http.Request) {
-//	if req.Method != http.MethodPost {
+//func userRegisterHandler(rep httpconverter.ResponseWriter, req *httpconverter.Request) {
+//	if req.Method != httpconverter.MethodPost {
 //		fmt.Fprintf(rep, `{"error":"invalid method"}`)
 //
 //		return
@@ -187,7 +187,7 @@ func setupService(cfg config.Config) Services {
 //	rep.Write([]byte(`{"register":"new user created"}`))
 //}
 
-//func healthCheckerHandler(rep http.ResponseWriter, req *http.Request) {
+//func healthCheckerHandler(rep httpconverter.ResponseWriter, req *httpconverter.Request) {
 //	fmt.Fprintf(rep, `{"message":"wellcome to game app"}`)
 //}
 //

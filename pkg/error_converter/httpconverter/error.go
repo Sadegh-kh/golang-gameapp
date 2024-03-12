@@ -1,4 +1,4 @@
-package httpserver
+package httpconverter
 
 import (
 	"errors"
@@ -24,7 +24,7 @@ func mapRichErrorCodeToHttpErrorCode(kind richerror.KindError) int {
 	}
 }
 
-func raiseError(err error) *echo.HTTPError {
+func RaiseError(err error) *echo.HTTPError {
 	var richEr richerror.RichError
 	ok := errors.As(err, &richEr)
 	if ok {
