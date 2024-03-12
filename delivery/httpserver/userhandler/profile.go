@@ -1,8 +1,8 @@
 package userhandler
 
 import (
+	"gameapp/param"
 	"gameapp/pkg/error_converter/httpconverter"
-	"gameapp/service/userservice"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strings"
@@ -16,7 +16,7 @@ func (h Handler) userProfile(c echo.Context) error {
 	if err != nil {
 		return httpconverter.RaiseError(err)
 	}
-	req := userservice.ProfileRequest{UserID: uid}
+	req := param.ProfileRequest{UserID: uid}
 
 	rep, err := h.userService.Profile(req)
 	if err != nil {

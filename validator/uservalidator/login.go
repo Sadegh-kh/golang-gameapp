@@ -2,13 +2,13 @@ package uservalidator
 
 import (
 	"errors"
-	"gameapp/dto"
+	"gameapp/param"
 	"gameapp/pkg/richerror"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"regexp"
 )
 
-func (v Validator) Login(req dto.LoginRequest) error {
+func (v Validator) Login(req param.LoginRequest) error {
 	const op = "uservalidator.Register"
 
 	// TODO - must add 11 to config

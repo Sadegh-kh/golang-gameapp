@@ -1,8 +1,8 @@
 package userservice
 
 import (
-	"gameapp/dto"
 	"gameapp/entity"
+	"gameapp/param"
 	"gameapp/pkg/hashpassword"
 	"gameapp/pkg/richerror"
 )
@@ -26,7 +26,7 @@ type Service struct {
 func New(stg Storage, authS authService) Service {
 	return Service{storage: stg, auth: authS}
 }
-func (s Service) Register(req dto.RegisterRequest) (dto.RegisterResponse, error) {
+func (s Service) Register(req param.RegisterRequest) (param.RegisterResponse, error) {
 
 	passHash := hashpassword.EncodePasword(req.Password)
 
@@ -37,7 +37,7 @@ func (s Service) Register(req dto.RegisterRequest) (dto.RegisterResponse, error)
 		Password:    passHash,
 	})
 	if err != nil {
-		return dto.RegisterResponse{}, richerror.RichError{
+		return param.RegisterResponse{}, richerror.RichError{
 			Operation:    "userservice.Register",
 			WrappedError: err,
 			Message:      "unexpected error",
@@ -48,15 +48,15 @@ func (s Service) Register(req dto.RegisterRequest) (dto.RegisterResponse, error)
 		}
 	}
 
-	return dto.RegisterResponse{ID: newUser.ID, Name: newUser.Name, PhoneNumber: newUser.PhoneNumber}, nil
+	return param.RegisterResponse{ID: newUser.ID, Name: newUser.Name, PhoneNumber: newUser.PhoneNumber}, nil
 }
 
-func (s Service) Login(req dto.LoginRequest) (dto.LoginResponse, error) {
+func (s Service) Login(req param.LoginRequest) (param.LoginResponse, error) {
 	// TODO - is better use 2 method for check user exist and get user for SOLID (S single responsibility)
 
 	user, err := s.storage.GetUserByPhoneNumber(req.PhoneNumber)
 	if err != nil {
-		return dto.LoginResponse{}, richerror.RichError{
+		return param.LoginResponse{}, richerror.RichError{
 			Operation:    "userservice.Login",
 			WrappedError: nil,
 			Message:      "phone number or password is incorrect",
@@ -72,7 +72,7 @@ func (s Service) Login(req dto.LoginRequest) (dto.LoginResponse, error) {
 
 	// check password
 	if user.Password != hashpassword.EncodePasword(req.Password) {
-		return dto.LoginResponse{}, richerror.RichError{
+		return param.LoginResponse{}, richerror.RichError{
 			Operation:    "userservice.Login",
 			WrappedError: nil,
 			Message:      "phone number or password is incorrect",
@@ -89,7 +89,7 @@ func (s Service) Login(req dto.LoginRequest) (dto.LoginResponse, error) {
 	// jwt token
 	accessToken, err := s.auth.CreateAccessToken(user.ID)
 	if err != nil {
-		return dto.LoginResponse{}, richerror.RichError{
+		return param.LoginResponse{}, richerror.RichError{
 			Operation:    "userservice.Register",
 			WrappedError: err,
 			Message:      "unexpected error",
@@ -102,7 +102,7 @@ func (s Service) Login(req dto.LoginRequest) (dto.LoginResponse, error) {
 
 	refreshToken, err := s.auth.CreateRefreshToken(user.ID)
 	if err != nil {
-		return dto.LoginResponse{}, richerror.RichError{
+		return param.LoginResponse{}, richerror.RichError{
 			Operation:    "userservice.Register",
 			WrappedError: err,
 			Message:      "unexpected error",
@@ -113,23 +113,16 @@ func (s Service) Login(req dto.LoginRequest) (dto.LoginResponse, error) {
 		}
 	}
 
-	return dto.LoginResponse{AccessToken: accessToken, RefreshToken: refreshToken}, nil
+	return param.LoginResponse{AccessToken: accessToken, RefreshToken: refreshToken}, nil
 
 }
 
-type ProfileRequest struct {
-	UserID uint `json:"user_id"`
-}
-type ProfileResponse struct {
-	Name string `json:"name"`
-}
-
-func (s Service) Profile(req ProfileRequest) (ProfileResponse, error) {
+func (s Service) Profile(req param.ProfileRequest) (param.ProfileResponse, error) {
 	user, err := s.storage.GetUserByID(req.UserID)
 	if err != nil {
-		return ProfileResponse{}, err
+		return param.ProfileResponse{}, err
 	}
 
-	return ProfileResponse{Name: user.Name}, nil
+	return param.ProfileResponse{Name: user.Name}, nil
 
 }

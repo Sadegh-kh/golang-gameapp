@@ -2,7 +2,7 @@ package userhandler
 
 import (
 	"errors"
-	"gameapp/dto"
+	"gameapp/param"
 	"gameapp/pkg/error_converter/httpconverter"
 	"gameapp/pkg/richerror"
 	"github.com/labstack/echo/v4"
@@ -10,7 +10,7 @@ import (
 )
 
 func (h Handler) userRegister(c echo.Context) error {
-	var regReq dto.RegisterRequest
+	var regReq param.RegisterRequest
 	err := c.Bind(&regReq)
 	if err != nil {
 		return httpconverter.RaiseError(err)
