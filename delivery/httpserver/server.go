@@ -35,7 +35,7 @@ func (s Server) Serve() {
 	e.GET("/", s.healthCheck)
 
 	// user routers
-	s.userHandler.UserRouter(e)
+	s.userHandler.UserRoutes(e)
 
 	// Start server
 	e.Logger.Fatal(e.Start(fmt.Sprintf("127.0.0.1:%d", s.config.HttpConf.Port)))

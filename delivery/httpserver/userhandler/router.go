@@ -2,7 +2,7 @@ package userhandler
 
 import "github.com/labstack/echo/v4"
 
-func (h Handler) UserRouter(e *echo.Echo) {
+func (h Handler) UserRoutes(e *echo.Echo) {
 	group := e.Group("/users")
 
 	group.POST("/register", h.userRegister)

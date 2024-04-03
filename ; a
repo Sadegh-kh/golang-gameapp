@@ -1,0 +1,28 @@
+warning: in the working copy of 'delivery/httpserver/server.go', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'delivery/httpserver/userhandler/router.go', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/delivery/httpserver/server.go b/delivery/httpserver/server.go[m
+[1mindex 86ff571..44f5127 100644[m
+[1m--- a/delivery/httpserver/server.go[m
+[1m+++ b/delivery/httpserver/server.go[m
+[36m@@ -35,7 +35,7 @@[m [mfunc (s Server) Serve() {[m
+ 	e.GET("/", s.healthCheck)[m
+ [m
+ 	// user routers[m
+[31m-	s.userHandler.UserRouter(e)[m
+[32m+[m	[32ms.userHandler.UserRoutes(e)[m
+ [m
+ 	// Start server[m
+ 	e.Logger.Fatal(e.Start(fmt.Sprintf("127.0.0.1:%d", s.config.HttpConf.Port)))[m
+[1mdiff --git a/delivery/httpserver/userhandler/router.go b/delivery/httpserver/userhandler/router.go[m
+[1mindex e53de13..e79d002 100644[m
+[1m--- a/delivery/httpserver/userhandler/router.go[m
+[1m+++ b/delivery/httpserver/userhandler/router.go[m
+[36m@@ -2,7 +2,7 @@[m [mpackage userhandler[m
+ [m
+ import "github.com/labstack/echo/v4"[m
+ [m
+[31m-func (h Handler) UserRouter(e *echo.Echo) {[m
+[32m+[m[32mfunc (h Handler) UserRoutes(e *echo.Echo) {[m
+ 	group := e.Group("/users")[m
+ [m
+ 	group.POST("/register", h.userRegister)[m
