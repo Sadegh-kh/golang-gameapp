@@ -32,13 +32,13 @@ func (s Service) CreateRefreshToken(uid uint) (string, error) {
 	return createToken(uid, s.config.RefreshSubject, s.config.SecretKey, s.config.RefreshTokenDuration)
 }
 
-func (s Service) ParseToken(token string) (uint, error) {
+func (s Service) ParseToken(token string) (Claims, error) {
 	var userClaim Claims
 	_, err := jwt.ParseWithClaims(token, &userClaim, func(token *jwt.Token) (interface{}, error) {
 		return []byte(s.config.SecretKey), nil
 	})
 	if err != nil {
-		return 0, richerror.RichError{
+		return Claims{}, richerror.RichError{
 			Operation:    "authservice.ParseToken",
 			WrappedError: err,
 			Message:      "invalid token",
@@ -48,7 +48,7 @@ func (s Service) ParseToken(token string) (uint, error) {
 			},
 		}
 	}
-	return userClaim.UserID, nil
+	return userClaim, nil
 }
 
 // Valid implements jwt.Claims.
