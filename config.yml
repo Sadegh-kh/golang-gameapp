@@ -1,0 +1,11 @@
+type: yml
+auth:
+  secret_key: "hello"
+  access_token_duration: 24h
+  refresh_token_duration: 168h
+http:
+  port: 8999
+mysql:
+  address: "localhost"
+  port: 3310
+  database_name: "gameapp_db"

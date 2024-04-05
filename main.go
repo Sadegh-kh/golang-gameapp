@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"gameapp/config"
 	"gameapp/delivery/httpserver"
 	"gameapp/service/authservice"
@@ -23,6 +24,8 @@ type Services struct {
 }
 
 func main() {
+	cfg2 := config.Load("config.yml")
+	fmt.Println("config:", cfg2)
 	// method 1
 	// mux := httpconverter.NewServeMux()
 	// mux.HandleFunc("/", healthCheckerHandler)

@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"gameapp/pkg/constant"
+	"gameapp/config"
 	"gameapp/service/authservice"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -9,7 +9,7 @@ import (
 
 func Auth(svc authservice.Service, cfg authservice.Config) echo.MiddlewareFunc {
 	return echojwt.WithConfig(echojwt.Config{
-		ContextKey: constant.MiddlewareAuthJWTContext,
+		ContextKey: config.MiddlewareAuthJWTContext,
 		SigningKey: cfg.SecretKey,
 
 		//TODO - add signing method to auth config

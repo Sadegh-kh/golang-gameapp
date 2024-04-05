@@ -7,11 +7,14 @@ import (
 )
 
 type Config struct {
-	SecretKey            string
-	AccessTokenDuration  time.Duration
-	RefreshTokenDuration time.Duration
-	AccessSubject        string
-	RefreshSubject       string
+	// do not use _ in meta tag koanf for secret key.
+	// because we get that variable from local env variable
+	SecretKey string `koanf:"secretKey"`
+
+	AccessTokenDuration  time.Duration `koanf:"access_token_duration"`
+	RefreshTokenDuration time.Duration `koanf:"refresh_token_duration"`
+	AccessSubject        string        `koanf:"access_subject"`
+	RefreshSubject       string        `koanf:"refresh_subject"`
 }
 
 type Service struct {

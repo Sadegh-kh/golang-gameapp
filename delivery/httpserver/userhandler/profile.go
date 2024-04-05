@@ -1,8 +1,8 @@
 package userhandler
 
 import (
+	"gameapp/config"
 	"gameapp/param"
-	"gameapp/pkg/constant"
 	"gameapp/pkg/error_converter/httpconverter"
 	"gameapp/service/authservice"
 	"github.com/labstack/echo/v4"
@@ -13,7 +13,7 @@ import (
 func (h Handler) userProfile(c echo.Context) error {
 	authToken := c.Request().Header.Get("Authorization")
 	authToken = strings.Replace(authToken, "Bearer ", "", 1)
-	user := c.Get(constant.MiddlewareAuthJWTContext).(authservice.Claims)
+	user := c.Get(config.MiddlewareAuthJWTContext).(authservice.Claims)
 
 	req := param.ProfileRequest{UserID: user.UserID}
 
