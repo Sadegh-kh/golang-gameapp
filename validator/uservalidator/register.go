@@ -12,7 +12,6 @@ import (
 func (v Validator) Register(req param.RegisterRequest) error {
 	const op = "uservalidator.Register"
 
-	// default is invalid ,but it can be Unexpected error from server or not found kind error
 	richError.Kind = richerror.Invalid
 
 	// TODO - must add 11 to config

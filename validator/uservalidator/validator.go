@@ -11,6 +11,7 @@ const (
 )
 
 var (
+	// richError for wrapped error from other layer
 	richError = new(richerror.RichError)
 )
 
