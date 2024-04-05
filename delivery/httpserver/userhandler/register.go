@@ -1,10 +1,8 @@
 package userhandler
 
 import (
-	"errors"
 	"gameapp/param"
 	"gameapp/pkg/error_converter/httpconverter"
-	"gameapp/pkg/richerror"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -19,9 +17,7 @@ func (h Handler) userRegister(c echo.Context) error {
 	//validation layer
 	err = h.userValidator.Register(regReq)
 	if err != nil {
-		var rErrs richerror.RichError
-		errors.As(err, &rErrs)
-		return echo.NewHTTPError(http.StatusBadRequest, rErrs.ValidationErrors)
+		return httpconverter.RaiseValidationError(err)
 	}
 
 	newUser, err := h.userService.Register(regReq)

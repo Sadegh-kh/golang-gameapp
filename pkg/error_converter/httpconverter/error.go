@@ -2,6 +2,7 @@ package httpconverter
 
 import (
 	"errors"
+	"fmt"
 	"gameapp/pkg/richerror"
 	"github.com/labstack/echo/v4"
 	"log"
@@ -29,7 +30,9 @@ func RaiseError(err error) *echo.HTTPError {
 	ok := errors.As(err, &richEr)
 	if ok {
 		statCode := mapRichErrorCodeToHttpErrorCode(richEr.Kind)
+		fmt.Println("\n--------------------log---------------------------")
 		log.Printf("error in %s : %s", richEr.Operation, richEr.Meta)
+		fmt.Println("--------------------log---------------------------\n")
 		return echo.NewHTTPError(statCode, echo.Map{
 			"error": richEr.Message,
 		})

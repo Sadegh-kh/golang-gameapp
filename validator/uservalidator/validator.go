@@ -1,10 +1,17 @@
 package uservalidator
 
-import "gameapp/entity"
+import (
+	"gameapp/entity"
+	"gameapp/pkg/richerror"
+)
 
 const (
 	IRPhoneNumberRegex = `^09[0-9]{9}$`
 	PasswordRegex      = `^[A-Za-z0-9@#$%!*&]{8,}$`
+)
+
+var (
+	richError = new(richerror.RichError)
 )
 
 type Storage interface {

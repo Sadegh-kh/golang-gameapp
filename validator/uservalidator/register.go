@@ -12,6 +12,9 @@ import (
 func (v Validator) Register(req param.RegisterRequest) error {
 	const op = "uservalidator.Register"
 
+	// default is invalid ,but it can be Unexpected error from server or not found kind error
+	richError.Kind = richerror.Invalid
+
 	// TODO - must add 11 to config
 	if err := validation.ValidateStruct(&req,
 
@@ -39,8 +42,8 @@ func (v Validator) Register(req param.RegisterRequest) error {
 			Operation:        op,
 			WrappedError:     err,
 			Message:          err.Error(),
-			Kind:             richerror.Invalid,
-			Meta:             nil,
+			Kind:             richError.Kind,
+			Meta:             richError.Meta,
 			ValidationErrors: mapErrs,
 		}
 	}
@@ -52,7 +55,13 @@ func (v Validator) checkPhoneNumberUniq(value interface{}) error {
 	phoneNum := value.(string)
 	if isUniq, err := v.storage.IsPhoneNumberUniq(phoneNum); err != nil || !isUniq {
 		if err != nil {
-			return err
+			var rErr richerror.RichError
+			errors.As(err, &rErr)
+
+			richError.Meta = rErr.Meta
+			richError.Kind = rErr.Kind
+
+			return fmt.Errorf("unexpected error")
 		}
 		if !isUniq {
 			return fmt.Errorf("phone number is not uniq")

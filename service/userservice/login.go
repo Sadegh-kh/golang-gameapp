@@ -22,9 +22,6 @@ func (s Service) Login(req param.LoginRequest) (param.LoginResponse, error) {
 		}
 	}
 
-	// secure reason
-	//TODO-add to login validator
-
 	// check password
 	if user.Password != hashpassword.EncodePasword(req.Password) {
 		return param.LoginResponse{}, richerror.RichError{

@@ -2,6 +2,7 @@ package uservalidator
 
 import (
 	"errors"
+	"fmt"
 	"gameapp/param"
 	"gameapp/pkg/richerror"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -10,6 +11,8 @@ import (
 
 func (v Validator) Login(req param.LoginRequest) error {
 	const op = "uservalidator.Register"
+
+	richError.Kind = richerror.Invalid
 
 	// TODO - must add 11 to config
 	if err := validation.ValidateStruct(&req,
@@ -35,8 +38,8 @@ func (v Validator) Login(req param.LoginRequest) error {
 			Operation:        op,
 			WrappedError:     err,
 			Message:          err.Error(),
-			Kind:             richerror.Invalid,
-			Meta:             nil,
+			Kind:             richError.Kind,
+			Meta:             richError.Meta,
 			ValidationErrors: mapErrs,
 		}
 	}
@@ -51,10 +54,11 @@ func (v Validator) checkUserExist(value interface{}) error {
 		var rErr richerror.RichError
 		errors.As(err, &rErr)
 
-		if rErr.Kind == richerror.NotFound {
-			rErr.Message = "phone number or password is incorrect"
+		richError.Kind = rErr.Kind
+		richError.Meta = rErr.Meta
 
-			return rErr
+		if rErr.Kind == richerror.NotFound {
+			return fmt.Errorf("phone number or password is incorrect")
 		}
 
 		return err

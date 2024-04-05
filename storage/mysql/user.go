@@ -27,7 +27,15 @@ func (d *MySQLDB) IsPhoneNumberUniq(phoneNumber string) (bool, error) {
 		if err == sql.ErrNoRows {
 			return true, nil
 		}
-		return false, fmt.Errorf("%w", err)
+		return false, richerror.RichError{
+			Operation:    "mysql.IsPhoneNumberUniq",
+			WrappedError: err,
+			Message:      "unexpected error",
+			Kind:         richerror.Unexpected,
+			Meta: map[string]interface{}{
+				"message": err.Error(),
+			},
+		}
 	}
 	return false, nil
 }
