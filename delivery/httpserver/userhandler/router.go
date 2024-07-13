@@ -2,6 +2,7 @@ package userhandler
 
 import (
 	"gameapp/delivery/httpserver/middleware"
+
 	"github.com/labstack/echo/v4"
 )
 

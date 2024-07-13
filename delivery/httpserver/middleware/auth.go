@@ -3,6 +3,7 @@ package middleware
 import (
 	"gameapp/config"
 	"gameapp/service/authservice"
+
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 )

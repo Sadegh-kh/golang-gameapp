@@ -10,16 +10,16 @@ type Storage interface {
 	GetUserByID(uid uint) (entity.User, error)
 }
 
-type authService interface {
+type authentication interface {
 	CreateAccessToken(uid uint) (string, error)
 	CreateRefreshToken(uid uint) (string, error)
 }
 
 type Service struct {
 	storage Storage
-	auth    authService
+	auth    authentication
 }
 
-func New(stg Storage, authS authService) Service {
+func New(stg Storage, authS authentication) Service {
 	return Service{storage: stg, auth: authS}
 }

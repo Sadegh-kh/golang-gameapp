@@ -5,9 +5,10 @@ import (
 	"gameapp/param"
 	"gameapp/pkg/error_converter/httpconverter"
 	"gameapp/service/authservice"
-	"github.com/labstack/echo/v4"
 	"net/http"
 	"strings"
+
+	"github.com/labstack/echo/v4"
 )
 
 func (h Handler) userProfile(c echo.Context) error {

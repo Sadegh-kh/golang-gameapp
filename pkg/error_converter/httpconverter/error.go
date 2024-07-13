@@ -4,9 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"gameapp/pkg/richerror"
-	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 func mapRichErrorCodeToHttpErrorCode(kind richerror.KindError) int {
@@ -26,15 +27,19 @@ func mapRichErrorCodeToHttpErrorCode(kind richerror.KindError) int {
 }
 
 func RaiseError(err error) *echo.HTTPError {
-	var richEr richerror.RichError
-	ok := errors.As(err, &richEr)
+	var rErr richerror.RichError
+	ok := errors.As(err, &rErr)
 	if ok {
-		statCode := mapRichErrorCodeToHttpErrorCode(richEr.Kind)
+		sCode := mapRichErrorCodeToHttpErrorCode(rErr.Kind)
 		fmt.Println("\n--------------------log---------------------------")
-		log.Printf("error in %s : %s", richEr.Operation, richEr.Meta)
+		log.Printf("error in %s : %s", rErr.Operation, rErr.Meta)
 		fmt.Println("--------------------log---------------------------\n")
-		return echo.NewHTTPError(statCode, echo.Map{
-			"error": richEr.Message,
+
+		if rErr.ValidationErrors != nil {
+			return echo.NewHTTPError(sCode, rErr.ValidationErrors)
+		}
+		return echo.NewHTTPError(sCode, echo.Map{
+			"error": rErr.Message,
 		})
 	}
 	return echo.NewHTTPError(http.StatusBadRequest, echo.Map{

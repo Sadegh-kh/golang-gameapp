@@ -98,7 +98,7 @@ func setupService(cfg config.Config) Services {
 //	authToken := req.Header.Get("Authorization")
 //	authToken = strings.Replace(authToken, "Bearer ", "", 1)
 //
-//	uid, err := authService.ParseToken(authToken)
+//	uid, err := authentication.ParseToken(authToken)
 //	if err != nil {
 //		fmt.Fprintf(rep, `{"error":"%v"}`, err)
 //

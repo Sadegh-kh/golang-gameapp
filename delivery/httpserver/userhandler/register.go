@@ -3,8 +3,9 @@ package userhandler
 import (
 	"gameapp/param"
 	"gameapp/pkg/error_converter/httpconverter"
-	"github.com/labstack/echo/v4"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 func (h Handler) userRegister(c echo.Context) error {
@@ -17,7 +18,7 @@ func (h Handler) userRegister(c echo.Context) error {
 	//validation layer
 	err = h.userValidator.Register(regReq)
 	if err != nil {
-		return httpconverter.RaiseValidationError(err)
+		return httpconverter.RaiseError(err)
 	}
 
 	newUser, err := h.userService.Register(regReq)
